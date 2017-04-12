@@ -83,9 +83,10 @@ class CsvReaderCommandTest extends \PHPUnit_Framework_TestCase
         
         $tester = new CommandTester($command);
         $tester->execute([
-            'command'  => $command->getName(),
-            'filename' => $this->fixturesDir . $this->validCsvFile,
-            '--max' => '1',
+            'command'      => $command->getName(),
+            'filename'     => $this->fixturesDir . $this->validCsvFile,
+            '--max'        => '1',
+            '--no-headers' => null, // no headers in file
         ]);
 
         $output = $tester->getDisplay();

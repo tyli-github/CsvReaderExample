@@ -30,6 +30,7 @@ class CsvReaderCommand extends Command
             ->addOption('charset', 0, InputOption::VALUE_REQUIRED, 'Default charset is "UTF-8"', 'UTF-8')
             ->addOption('delimiter', 0, InputOption::VALUE_REQUIRED, 'Default delimiter is ","', ',')
             ->addOption('max', 0, InputOption::VALUE_REQUIRED, 'Max rows to show', 100)
+            ->addOption('no-headers', 0, InputOption::VALUE_NONE, 'Use this if CSV contains no headers as first row')
         ;
     }
 
@@ -48,7 +49,8 @@ class CsvReaderCommand extends Command
         // setup options
         $charset   = strtoupper($input->getOption('charset'));
         $delimiter = $input->getOption('delimiter');
-        $max       = (int)$input->getOption('max') + 1;
+        $noHeaders = $input->getOption('no-headers');
+        $max       = (int)$input->getOption('max');
 
         // create CSV reader
         $reader  = $this->createReader($filename, $delimiter, $charset);
@@ -60,8 +62,17 @@ class CsvReaderCommand extends Command
             return;
         }
 
+        // add first row back if no headers
+        if (true === $noHeaders) {
+            $rows = $reader->readNextRows(null, --$max);
+            array_unshift($rows, $headers);
+            $headers = [];
+        } else {
+            $rows = $reader->readNextRows(null, $max);
+        }
+        
         // first row is used as headers
-        $this->renderTable($output, $headers, $reader->readNextRows(null, --$max));
+        $this->renderTable($output, $headers, $rows);
     }
 
     /**
