@@ -1,0 +1,19 @@
+{
+    "name": "sephin/csv-console-reader",
+    "require": {
+        "symfony/console": "^3.2",
+        "symfony/finder": "^3.2",
+        "ajgl/csv": "^0.4.0"
+    },
+    "authors": [
+        {
+            "name": "Yuen Li",
+            "email": "li.tsanyuen@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MyConsoleApp\\": "src/" 
+        }
+    }
+}
