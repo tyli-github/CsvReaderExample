@@ -48,7 +48,7 @@ class CsvReaderCommand extends Command
         // setup options
         $charset   = strtoupper($input->getOption('charset'));
         $delimiter = $input->getOption('delimiter');
-        $max       = $input->getOption('max');
+        $max       = (int)$input->getOption('max') + 1;
 
         // create CSV reader
         $reader  = $this->createReader($filename, $delimiter, $charset);
