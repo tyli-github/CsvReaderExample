@@ -2,9 +2,13 @@
     "name": "sephin/csv-console-reader",
     "description": "CSV Reader command example",
     "require": {
-        "symfony/console": "^3.2",
-        "symfony/finder": "^3.2",
-        "ajgl/csv": "^0.4.0"
+        "php": "^7.4",
+        "ajgl/csv": "^0.5.1",
+        "symfony/console": "^5.2",
+        "symfony/finder": "^5.2"
+    },
+    "config": {
+        "sort-packages": true
     },
     "authors": [
         {

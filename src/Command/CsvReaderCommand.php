@@ -1,10 +1,12 @@
 <?php
-/**
- * @author Yuen Li <li.tsanyuen@gmail.com>
- */
+
+declare(strict_types=1);
+
 namespace MyConsoleApp\Command;
 
 use Ajgl\Csv\Csv;
+use Ajgl\Csv\Io\IoInterface;
+use Ajgl\Csv\Reader\ReaderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -43,7 +45,7 @@ class CsvReaderCommand extends Command
         $filename = $input->getArgument('filename');
         if (false === is_readable($filename)) {
             $output->writeln(sprintf('<error>File "%s" does not exist</error>', $filename));
-            return;
+            return 1;
         }
 
         // setup options
@@ -59,20 +61,22 @@ class CsvReaderCommand extends Command
         $headers = $reader->readNextRow();
         if (!array_filter($headers)) {
             $output->writeln('<error>No rows found in CSV file</error>');
-            return;
+            return 1;
         }
 
         // add first row back if no headers
         if (true === $noHeaders) {
-            $rows = $reader->readNextRows(null, --$max);
+            $rows = $reader->readNextRows(IoInterface::CHARSET_DEFAULT, --$max);
             array_unshift($rows, $headers);
             $headers = [];
         } else {
-            $rows = $reader->readNextRows(null, $max);
+            $rows = $reader->readNextRows(IoInterface::CHARSET_DEFAULT, $max);
         }
         
         // first row is used as headers
         $this->renderTable($output, $headers, $rows);
+
+        return 0;
     }
 
     /**
@@ -103,18 +107,12 @@ class CsvReaderCommand extends Command
         $output->writeln('');
         $table->render();
     }
-    
-    /**
-     * Creates instance of CSV Reader.
-     * @return \Ajgl\Csv\Reader\RfcReader
-     */
-    protected function createReader($filename, $delimiter, $charset, $readerType = 'rfc')
+
+    protected function createReader($filename, $delimiter, $charset, $readerType = 'rfc'): ReaderInterface
     {
-        /* @var $csv Csv */
         $csv = Csv::create();
         $csv->setDefaultReaderType($readerType);
 
         return $csv->createReader($filename, $delimiter, $charset);
     }
-
 }
