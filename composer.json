@@ -1,5 +1,6 @@
 {
     "name": "sephin/csv-console-reader",
+    "description": "CSV Reader command example",
     "require": {
         "symfony/console": "^3.2",
         "symfony/finder": "^3.2",
