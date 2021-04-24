@@ -1,7 +1,10 @@
 #!/usr/bin/env php
 <?php
+
+declare(strict_types=1);
+
 use Symfony\Component\Console\Application;
-use MyConsoleApp\Command\CsvReaderCommand;
+use App\Command\CsvReaderCommand;
 
 require __DIR__ . '/vendor/autoload.php';
 

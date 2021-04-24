@@ -1,42 +1,22 @@
 <?php
-/**
- * @author Yuen Li <li.tsanyuen@gmail.com>
- */
-namespace Tests\MyConsoleApp\Command;
 
-use MyConsoleApp\Command\CsvReaderCommand;
+declare(strict_types=1);
+
+namespace App\Tests\Command;
+
+use App\Command\CsvReaderCommand;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class CsvReaderCommandTest extends \PHPUnit_Framework_TestCase
+class CsvReaderCommandTest extends TestCase
 {
-    /**
-     * @var string
-     */
-    protected $fixturesDir = __DIR__;
-    
-    /**
-     * @var string
-     */
-    protected $emptyCsvFile = '/Fixtures/empty.csv';
-    
-    /**
-     * @var string
-     */
-    protected $validCsvFile = '/Fixtures/valid.csv';
+    protected string $fixturesDir = __DIR__;
 
-    /**
-     * {@inheritDoc} 
-     */
-    protected function setUp()
-    {
-        
-    }
+    protected string $emptyCsvFile = '/Fixtures/empty.csv';
 
-    /**
-     * @covers MyConsoleApp\Command\CsvReaderCommand::configure
-     * @covers MyConsoleApp\Command\CsvReaderCommand::execute
-     */
+    protected string $validCsvFile = '/Fixtures/valid.csv';
+
     public function testInvalidFile()
     {
         $command = new CsvReaderCommand();
@@ -48,14 +28,9 @@ class CsvReaderCommandTest extends \PHPUnit_Framework_TestCase
             'filename' => 'bla',
         ]);
         
-        $this->assertRegExp('/File "bla" does not exist/', $tester->getDisplay());
+        $this->assertMatchesRegularExpression('/File "bla" does not exist/', $tester->getDisplay());
     }
-    
-    /**
-     * @covers MyConsoleApp\Command\CsvReaderCommand::configure
-     * @covers MyConsoleApp\Command\CsvReaderCommand::execute
-     * @covers MyConsoleApp\Command\CsvReaderCommand::createReader
-     */
+
     public function testNoData()
     {
         $command = new CsvReaderCommand();
@@ -67,15 +42,9 @@ class CsvReaderCommandTest extends \PHPUnit_Framework_TestCase
             'filename' => $this->fixturesDir . $this->emptyCsvFile,
         ]);
         
-        $this->assertRegExp('/No rows found in CSV file/', $tester->getDisplay());
+        $this->assertMatchesRegularExpression('/No rows found in CSV file/', $tester->getDisplay());
     }
-    
-    /**
-     * @covers MyConsoleApp\Command\CsvReaderCommand::configure
-     * @covers MyConsoleApp\Command\CsvReaderCommand::execute
-     * @covers MyConsoleApp\Command\CsvReaderCommand::createReader
-     * @covers MyConsoleApp\Command\CsvReaderCommand::renderTable
-     */
+
     public function testMaxRows()
     {
         $command = new CsvReaderCommand();
@@ -90,17 +59,11 @@ class CsvReaderCommandTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $output = $tester->getDisplay();
-        $this->assertRegExp('/row1/', $output);
-        $this->assertNotRegExp('/row2/', $output);
-        $this->assertNotRegExp('/row3/', $output);
+        $this->assertMatchesRegularExpression('/row1/', $output);
+        $this->assertDoesNotMatchRegularExpression('/row2/', $output);
+        $this->assertDoesNotMatchRegularExpression('/row3/', $output);
     }
-    
-    /**
-     * @covers MyConsoleApp\Command\CsvReaderCommand::configure
-     * @covers MyConsoleApp\Command\CsvReaderCommand::execute
-     * @covers MyConsoleApp\Command\CsvReaderCommand::createReader
-     * @covers MyConsoleApp\Command\CsvReaderCommand::renderTable
-     */
+
     public function testTableOutput()
     {
         $command = new CsvReaderCommand();
@@ -113,8 +76,8 @@ class CsvReaderCommandTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $output = $tester->getDisplay();
-        $this->assertRegExp('/row1/', $output);
-        $this->assertRegExp('/row2/', $output);
-        $this->assertRegExp('/row3/', $output);
+        $this->assertMatchesRegularExpression('/row1/', $output);
+        $this->assertMatchesRegularExpression('/row2/', $output);
+        $this->assertMatchesRegularExpression('/row3/', $output);
     }
 }

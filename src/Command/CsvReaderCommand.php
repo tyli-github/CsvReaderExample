@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MyConsoleApp\Command;
+namespace App\Command;
 
 use Ajgl\Csv\Csv;
 use Ajgl\Csv\Io\IoInterface;
