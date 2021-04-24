@@ -1,13 +1,22 @@
-Symfony Console CSV Reader Example
-========================
+# Symfony Console CSV Reader Example
 
 For demonstration purposes only!
 
-1) Setup
-----------------------------------
+## Requirements
+- php 7.x
 
-- composer install -a
+## Setup
+```
+composer install -a
+```
 
-- run `php console csv:read ./data/example.csv` to view CSV data from example file
+## Usage
+View CSV data from example file
+```
+php console csv:read ./data/example.csv
+```
 
-- run `php console csv:read -h` for options like "max"
+Run the test
+```
+php ./vendor/bin/phpunit tests/Command/CsvReaderCommandTest.php
+```
