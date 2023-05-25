@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use Ajgl\Csv\Csv;
-use Ajgl\Csv\Io\IoInterface;
-use Ajgl\Csv\Reader\ReaderInterface;
+use League\Csv\Reader;
+use League\Csv\Statement;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,30 +17,24 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * CSV Reader command for console.
  */
-class CsvReaderCommand extends Command
+final class CsvReaderCommand extends Command
 {
-    /**
-     * {@inheritDoc} 
-     */
+    private const OPEN_MODE = 'r';
+
     protected function configure()
     {
         $this
             ->setName('csv:read')
             ->setDescription('Reads data from a CSV file.')
             ->addArgument('filename', InputArgument::REQUIRED, 'CSV file to read from.')
-            ->addOption('charset', 0, InputOption::VALUE_REQUIRED, 'Default charset is "UTF-8"', 'UTF-8')
             ->addOption('delimiter', 0, InputOption::VALUE_REQUIRED, 'Default delimiter is ","', ',')
             ->addOption('max', 0, InputOption::VALUE_REQUIRED, 'Max rows to show', 100)
             ->addOption('no-headers', 0, InputOption::VALUE_NONE, 'Use this if CSV contains no headers as first row')
         ;
     }
 
-    /**
-     * {@inheritDoc} 
-     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // simply check if file exist
         $filename = $input->getArgument('filename');
         if (false === is_readable($filename)) {
             $output->writeln(sprintf('<error>File "%s" does not exist</error>', $filename));
@@ -49,42 +42,35 @@ class CsvReaderCommand extends Command
         }
 
         // setup options
-        $charset   = strtoupper($input->getOption('charset'));
         $delimiter = $input->getOption('delimiter');
         $noHeaders = $input->getOption('no-headers');
-        $max       = (int)$input->getOption('max');
+        $max = (int)$input->getOption('max');
 
-        // create CSV reader
-        $reader  = $this->createReader($filename, $delimiter, $charset);
-        
-        // fetch first row to check if data is present (use array_filter to filter out empty results like [0 => NULL])
-        $headers = $reader->readNextRow();
-        if (!array_filter($headers)) {
-            $output->writeln('<error>No rows found in CSV file</error>');
-            return 1;
+        $csv = Reader::createFromPath($filename, self::OPEN_MODE);
+        $csv->setDelimiter($delimiter);
+
+        if ($csv->count() === 0) {
+            $output->writeln('<info>No rows found in CSV file</info>');
+            return 0;
         }
 
-        // add first row back if no headers
-        if (true === $noHeaders) {
-            $rows = $reader->readNextRows(IoInterface::CHARSET_DEFAULT, --$max);
-            array_unshift($rows, $headers);
-            $headers = [];
-        } else {
-            $rows = $reader->readNextRows(IoInterface::CHARSET_DEFAULT, $max);
+        $headers = [];
+        if (true !== $noHeaders) {
+            $csv->setHeaderOffset(0);
+            $headers = $csv->getHeader();
         }
-        
-        // first row is used as headers
+
+        $stmt = Statement::create()->limit($max);
+        $records = $stmt->process($csv);
+        $rows = array_values(array_map(function (array $row) {
+            return $row;
+        }, iterator_to_array($records)));
+
         $this->renderTable($output, $headers, $rows);
 
         return 0;
     }
 
-    /**
-     * Render data in a table with a progress bar.
-     * @param OutputInterface $output
-     * @param array $headers Headers of the table
-     * @param array $rows Table data
-     */
     protected function renderTable(OutputInterface $output, array $headers, array $rows)
     {
         $table = new Table($output);
@@ -92,9 +78,9 @@ class CsvReaderCommand extends Command
         if (!empty($headers)) {
             $table->setHeaders($headers);
         }
-        
+
         $rowCount = count($rows);
-        
+
         $progressBar = new ProgressBar($output, $rowCount);
         $progressBar->setProgressCharacter("\xF0\x9F\x8D\xBA");
         for ($i=0; $i<$rowCount; ++$i) {
@@ -106,13 +92,5 @@ class CsvReaderCommand extends Command
         $progressBar->finish();
         $output->writeln('');
         $table->render();
-    }
-
-    protected function createReader($filename, $delimiter, $charset, $readerType = 'rfc'): ReaderInterface
-    {
-        $csv = Csv::create();
-        $csv->setDefaultReaderType($readerType);
-
-        return $csv->createReader($filename, $delimiter, $charset);
     }
 }
