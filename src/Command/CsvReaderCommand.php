@@ -21,7 +21,7 @@ final class CsvReaderCommand extends Command
 {
     private const OPEN_MODE = 'r';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('csv:read')
@@ -33,7 +33,7 @@ final class CsvReaderCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $filename = $input->getArgument('filename');
         if (false === is_readable($filename)) {
@@ -71,7 +71,7 @@ final class CsvReaderCommand extends Command
         return 0;
     }
 
-    protected function renderTable(OutputInterface $output, array $headers, array $rows)
+    protected function renderTable(OutputInterface $output, array $headers, array $rows): void
     {
         $table = new Table($output);
         
