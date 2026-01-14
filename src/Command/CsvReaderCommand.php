@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class CsvReaderCommand extends Command
 {
-    private const OPEN_MODE = 'r';
+    private const string OPEN_MODE = 'r';
 
     protected function configure(): void
     {
@@ -27,9 +27,9 @@ final class CsvReaderCommand extends Command
             ->setName('csv:read')
             ->setDescription('Reads data from a CSV file.')
             ->addArgument('filename', InputArgument::REQUIRED, 'CSV file to read from.')
-            ->addOption('delimiter', 0, InputOption::VALUE_REQUIRED, 'Default delimiter is ","', ',')
-            ->addOption('max', 0, InputOption::VALUE_REQUIRED, 'Max rows to show', 100)
-            ->addOption('no-headers', 0, InputOption::VALUE_NONE, 'Use this if CSV contains no headers as first row')
+            ->addOption('delimiter', null, InputOption::VALUE_REQUIRED, 'Default delimiter is ","', ',')
+            ->addOption('max', null, InputOption::VALUE_REQUIRED, 'Max rows to show', 100)
+            ->addOption('no-headers', null, InputOption::VALUE_NONE, 'Use this if CSV contains no headers as first row')
         ;
     }
 
@@ -46,7 +46,7 @@ final class CsvReaderCommand extends Command
         $noHeaders = $input->getOption('no-headers');
         $max = (int)$input->getOption('max');
 
-        $csv = Reader::createFromPath($filename, self::OPEN_MODE);
+        $csv = Reader::from($filename, self::OPEN_MODE);
         $csv->setDelimiter($delimiter);
 
         if ($csv->count() === 0) {
@@ -60,7 +60,8 @@ final class CsvReaderCommand extends Command
             $headers = $csv->getHeader();
         }
 
-        $stmt = Statement::create()->limit($max);
+        $stmt = new Statement();
+        $stmt = $stmt->limit($max);
         $records = $stmt->process($csv);
         $rows = array_values(array_map(function (array $row) {
             return $row;

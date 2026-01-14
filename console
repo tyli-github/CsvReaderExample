@@ -8,6 +8,6 @@ use App\Command\CsvReaderCommand;
 
 require __DIR__ . '/vendor/autoload.php';
 
-$application = new Application();
-$application->add(new CsvReaderCommand());
+$application = new Application('myapp', '1.0 (stable)');
+$application->addCommand(new CsvReaderCommand());
 $application->run();

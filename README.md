@@ -1,7 +1,7 @@
 # Symfony Console CSV Reader Example
 
 ## Requirements
-- php ^8.1
+- php ^8.4
 
 ## Setup
 ```
